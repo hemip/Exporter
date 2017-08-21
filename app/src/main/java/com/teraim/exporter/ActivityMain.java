@@ -12,7 +12,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.Manifest;
 import android.app.Activity;
@@ -25,6 +27,7 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -101,39 +104,59 @@ public class ActivityMain extends Activity {
 		System.exit(1); // kill off the crashed app
 	}
 
-	private void exportMarkedRows(List<Provyta> pyL, List<JSON_Report> jsonL) {
-		boolean[] checkedRowsA = ((ProvytaAdapter)pyListV.getAdapter()).getCheckedRows();
-		int i=0; StringBuilder listB = new StringBuilder();
-		for (boolean rowChecked:checkedRowsA) {
-			if (rowChecked) {
-				try {
-
-					Persistent.export(jsonL.get(i),pyL.get(i));
-					listB.append(pyL.get(i).getpyID());
-					listB.append("\n");
-				}
-
-				catch (FileNotFoundException e) {
-					Log.e("vortex","IO ERROR");
-				}
+	private void exportMarkedRows(List<Provyta> pyL, Map<String,JSON_Report> jsonL) {
+		Map<CheckBox, String> checkedRowsA = ((ProvytaAdapter) pyListV.getAdapter()).getCheckedRows();
+        for (CheckBox cb: checkedRowsA.keySet()) {
+            Log.d("v","checkbox: "+cb.toString()+" py: "+checkedRowsA.get(cb)+" isch "+cb.isChecked());
+        }
+		StringBuilder listB = new StringBuilder();
+		for (CheckBox cb : checkedRowsA.keySet()) {
+			Log.d("vortex","found cb for "+checkedRowsA.get(cb)+" checked? "+cb.isChecked());
+			if (cb.isChecked()) {
+				//Find correct provyta and json
+				String pyId = checkedRowsA.get(cb);
+				Provyta py = findPy(pyId,pyL);
+				if (py!=null) {
+					try {
+						Log.d("vortex", "exporting py " + pyId);
+						Persistent.export(jsonL.get(pyId), py);
+						listB.append(pyId);
+						listB.append("\n");
+					} catch (FileNotFoundException e) {
+						Log.e("vortex", "IO ERROR");
+					}
+				} else
+					Log.e("vortex","py with id "+pyId+" missing from list: "+pyL.toString());
 
 			}
-			i++;
 		}
+
+
+
+
+
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("Exporterade: ")
+			builder.setTitle("Exporterade: ")
 				.setMessage(listB.toString()).setPositiveButton("Ok", null)
 				.show();
 	}
 
+	private Provyta findPy(String pyID, List<Provyta> pyList) {
+		for (Provyta py:pyList) {
+			if (py.getpyID().equals(pyID))
+				return py;
+		}
+		return null;
+	}
 
+	
 
 
 	private void getStarted() {
 
 		//Get provytor if any.
 		final List<Provyta> pyL = Persistent.loadAll();
-		final List<JSON_Report> jsonL = new ArrayList<JSON_Report>();
+		final Map<String,JSON_Report> jsonL = new HashMap<String,JSON_Report>();
 		Log.d("Strand", "pylist contains " + pyL.size() + " objects");
 
 		//Generate JSON.
@@ -144,11 +167,11 @@ public class ActivityMain extends Activity {
 			for (Provyta py : pyL)
 				if (py.isNormal()) {
 					Log.d("Strand", "generating normal json for py " + py.getpyID());
-					jsonL.add(jsonParser.normal(py));
+					jsonL.put(py.getpyID(),jsonParser.normal(py));
 
 				} else {
 					Log.d("Strand", "generating json no_input for py " + py.getpyID());
-					jsonL.add(jsonParser.noInput(py));
+					jsonL.put(py.getpyID(),jsonParser.noInput(py));
 
 				}
 		} catch (IOException e) {

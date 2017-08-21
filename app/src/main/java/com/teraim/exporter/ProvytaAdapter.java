@@ -1,6 +1,8 @@
 package com.teraim.exporter;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -21,22 +23,15 @@ public class ProvytaAdapter extends BaseAdapter {
 
 	private LayoutInflater mLayoutInflater;
 	private List<Provyta> pyList;
-	private boolean[] isCheckedL;
-	List<JSON_Report> jsonL;
+	private Map<CheckBox,String> isCheckedL;
+	private Map<String,JSON_Report> jsonL;
 	private Context myCtx;
 
 
-	public ProvytaAdapter(Context context, List<Provyta> pyList,List<JSON_Report> jsonL) {
+	public ProvytaAdapter(Context context, List<Provyta> pyList,Map<String,JSON_Report> jsonL) {
 		mLayoutInflater = LayoutInflater.from(context);
 		this.pyList=pyList;
-		if (pyList!=null) {
-			isCheckedL = new boolean[pyList.size()];
-			int i =0;
-			for (Provyta py: pyList) {
-
-				isCheckedL[i++] = py.isLocked();
-			}
-		}
+		isCheckedL = new HashMap<CheckBox,String>();
 		this.jsonL=jsonL;
 		myCtx = context;
 	}
@@ -48,40 +43,38 @@ public class ProvytaAdapter extends BaseAdapter {
 	 * @see android.widget.ArrayAdapter#getView(int, android.view.View, android.view.ViewGroup)
 	 */
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
-		Log.d("Strand","GetView called for position "+position);
-		final int pos = position;
-		Provyta py = pyList.get(position);
-		if(convertView==null)
+	public View getView(final int position, View convertView, ViewGroup parent) {
+
+        final Provyta py = pyList.get(position);
+        Log.d("Strand","GetView called for position "+position+" and pyid "+py.getpyID());
+
+
+		final JSON_Report json = jsonL.get(py.getpyID());
+
+		if(convertView==null) {
 			convertView = mLayoutInflater.inflate(R.layout.pylist_row, null);
-		CheckBox	cb =((CheckBox)convertView.findViewById(R.id.export));
-		cb.setChecked(py.isLocked());
-		cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-			@Override
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				if (isCheckedL!=null) {
-					Log.d("v","ischecked "+isChecked+" pos: "+pos);
-					isCheckedL[pos] = isChecked;
-				}
+			final CheckBox cb = ((CheckBox) convertView.findViewById(R.id.export));
+			cb.setChecked(py.isLocked());
+			isCheckedL.put(cb, py.getpyID());
+			if (cb.isChecked())
+				Log.d("pytex ", "isChecked: " + py.getpyID());
+		}
 
-			}
-		});
 		((TextView)convertView.findViewById(R.id.pyName)).setText(py.getpyID());
-
 		((TextView)convertView.findViewById(R.id.markedReady)).setText(py.isLocked()?"Ja":"Nej");
 		//((TextView)convertView.findViewById(R.id.markedExported)).setText("_");
 		TextView tomma = ((TextView)convertView.findViewById(R.id.tomma));
-		tomma.setText(Integer.toString(jsonL.get(position).empty.size()));
+		tomma.setText(Integer.toString(json.empty.size()));
 		tomma.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				String out = format(jsonL.get(pos).empty);
+				String out = format(json.empty);
 				AlertDialog.Builder builder = new AlertDialog.Builder(ProvytaAdapter.this.getContext());
 				builder.setTitle("Variabler som inte angivits")
 						.setMessage(out).setPositiveButton("Ok", null)
 						.show();
-				Log.d("v",jsonL.get(pos).json.toString());
+				Log.d("v",json.json.toString());
 			}
 
 			private String format(List<String> empty) {
@@ -105,7 +98,7 @@ public class ProvytaAdapter extends BaseAdapter {
 		return convertView;
 	}
 
-	public boolean[] getCheckedRows() {
+	public Map<CheckBox,String> getCheckedRows() {
 		return isCheckedL;
 	}
 

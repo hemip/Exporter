@@ -109,7 +109,7 @@ public class JSONify {
         writeArray(py.getDeponi());
 
         Log.d("p","Träd:");
-        writer.name("Träd");
+        writer.name("Trad");
         writeArray(py.getTräd());
 
         Log.d("p","Vallar:");
