@@ -46,7 +46,7 @@ public class ActivityMain extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+/*
 		Thread.setDefaultUncaughtExceptionHandler (new Thread.UncaughtExceptionHandler()
 		{
 			@Override
@@ -57,6 +57,7 @@ public class ActivityMain extends Activity {
 				handleUncaughtException (thread, e);
 			}
 		});
+		*/
 
 		setContentView(R.layout.activity_main);
         try
@@ -105,35 +106,29 @@ public class ActivityMain extends Activity {
 	}
 
 	private void exportMarkedRows(List<Provyta> pyL, Map<String,JSON_Report> jsonL) {
-		Map<CheckBox, String> checkedRowsA = ((ProvytaAdapter) pyListV.getAdapter()).getCheckedRows();
-        for (CheckBox cb: checkedRowsA.keySet()) {
-            Log.d("v","checkbox: "+cb.toString()+" py: "+checkedRowsA.get(cb)+" isch "+cb.isChecked());
-        }
+		boolean isChecked[] =((ProvytaAdapter) pyListV.getAdapter()).getIsChecked();
+		int position =0;
 		StringBuilder listB = new StringBuilder();
-		for (CheckBox cb : checkedRowsA.keySet()) {
-			Log.d("vortex","found cb for "+checkedRowsA.get(cb)+" checked? "+cb.isChecked());
-			if (cb.isChecked()) {
+
+		for (boolean cb:isChecked) {
+			if (cb) {
 				//Find correct provyta and json
-				String pyId = checkedRowsA.get(cb);
-				Provyta py = findPy(pyId,pyL);
-				if (py!=null) {
+
+				Provyta py = pyL.get(position);
+				if (py != null) {
 					try {
-						Log.d("vortex", "exporting py " + pyId);
-						Persistent.export(jsonL.get(pyId), py);
-						listB.append(pyId);
+						Log.d("vortex", "exporting py " + py.getpyID());
+						Persistent.export(jsonL.get(py.getpyID()), py);
+						listB.append(py.getpyID());
 						listB.append("\n");
 					} catch (FileNotFoundException e) {
 						Log.e("vortex", "IO ERROR");
 					}
-				} else
-					Log.e("vortex","py with id "+pyId+" missing from list: "+pyL.toString());
+				}
 
 			}
+			position++;
 		}
-
-
-
-
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle("Exporterade: ")
@@ -264,10 +259,10 @@ public class ActivityMain extends Activity {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-			OutputStream os=null;
+
 			// to upload, open an OutputStream, to download, open an InputStream:  
 			try {
-				os = conn.getOutputStream();
+				OutputStream os = conn.getOutputStream();
 				final PrintStream printStream = new PrintStream(os);
 				printStream.print(toSend);
 				printStream.close();
