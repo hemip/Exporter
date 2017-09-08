@@ -9,7 +9,7 @@ android {
         minSdkVersion 15
         targetSdkVersion 19
         versionCode 1
-        versionName "17.05"
+        versionName "17_05"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     compileOptions {
