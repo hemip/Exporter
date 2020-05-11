@@ -2,6 +2,7 @@
 
 package="com.teraim.exporter">
 
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 <application
@@ -33,6 +34,9 @@ package="com.teraim.exporter">
             <action android:name="com.teraim.exporter.SEND_LOG" />
             <category android:name="android.intent.category.DEFAULT" />
         </intent-filter>
+    </activity>
+    <activity android:name="com.teraim.exporter.UploadActivity">
+
     </activity>
 </application>
 </manifest>

@@ -1,41 +1,29 @@
 package com.teraim.exporter;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.teraim.exporter.JSONify.JSON_Report;
 import com.teraim.strand.Provyta;
-
-import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE;
 
 
 public class ActivityMain extends Activity {
@@ -194,6 +182,14 @@ public class ActivityMain extends Activity {
 				exportMarkedRows(pyL,jsonL);
 			}
 		});
+		((Button)findViewById(R.id.uploadButton)).setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent intent_upload = new Intent(getBaseContext(), UploadActivity.class);
+				startActivity(intent_upload);
+			}
+		});
+
 		//Borttaget i version 2017.01
 		//FTPSend f = new FTPSend();
 		//f.send("test.txt", jsonL.get(0).json);

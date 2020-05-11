@@ -60,8 +60,14 @@
         android:id="@+id/button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/versionField"
+        android:layout_above="@+id/uploadButton"
         android:text="Skriv ut markerade" />
+    <Button
+        android:id="@+id/uploadButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/versionField"
+        android:text="Ladda upp" />
 
     <TextView
         android:id="@+id/versionField"
